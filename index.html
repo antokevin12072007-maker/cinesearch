@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineSearch 🎬</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #13131a;
+      --card:      #1a1a24;
+      --border:    #2a2a38;
+      --gold:      #f5c518;
+      --red:       #e50914;
+      --text:      #f0f0f0;
+      --muted:     #888;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(180deg, #000 0%, transparent 100%);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(245,197,24,0.4);
+    }
+
+    .logo span { color: var(--red); }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 70px 20px 40px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(229,9,20,0.15) 0%, transparent 70%);
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      letter-spacing: 6px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 span { color: var(--gold); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 36px;
+      font-weight: 300;
+    }
+
+    /* ── SEARCH BOX ── */
+    .search-wrap {
+      display: flex;
+      max-width: 600px;
+      margin: 0 auto 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(245,197,24,0.1);
+    }
+
+    #searchInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 16px 24px;
+      font-size: 1rem;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+    }
+
+    #searchInput::placeholder { color: var(--muted); }
+
+    #searchBtn {
+      background: var(--red);
+      border: none;
+      padding: 16px 28px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      transition: background 0.2s;
+      border-radius: 0 50px 50px 0;
+    }
+
+    #searchBtn:hover { background: #c1070f; }
+
+    .search-hint {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px 20px 0;
+    }
+
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 22px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--gold);
+      color: #000;
+      border-color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+      padding: 30px 40px 10px;
+    }
+
+    .section-title span { color: var(--text); }
+
+    /* ── GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 16px 40px 40px;
+    }
+
+    /* ── MOVIE CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      border-color: var(--gold);
+    }
+
+    .card-poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      object-fit: cover;
+      display: block;
+      background: var(--surface);
+    }
+
+    .card-no-poster {
+      width: 100%;
+      aspect-ratio: 2/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 3rem;
+    }
+
+    .card-info {
+      padding: 12px;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-year {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .card-rating {
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .card-type {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .watch-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      border-radius: var(--radius);
+    }
+
+    .card:hover .watch-overlay { opacity: 1; }
+
+    .play-btn-big {
+      background: var(--red);
+      border: none;
+      color: #fff;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .play-btn-big:hover { transform: scale(1.1); }
+
+    /* ── MODAL ── */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-bg.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover { background: var(--red); }
+
+    .modal-top {
+      display: flex;
+      gap: 24px;
+      padding: 28px;
+    }
+
+    .modal-poster {
+      width: 140px;
+      min-width: 140px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+
+    .modal-no-poster {
+      width: 140px;
+      min-width: 140px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      aspect-ratio: 2/3;
+    }
+
+    .modal-details { flex: 1; }
+
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+      line-height: 1.1;
+    }
+
+    .modal-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 3px 12px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .badge.gold { border-color: var(--gold); color: var(--gold); }
+    .badge.red  { border-color: var(--red);  color: var(--red);  background: rgba(229,9,20,0.1); }
+
+    .modal-plot {
+      font-size: 0.88rem;
+      color: #bbb;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .modal-row {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .modal-row strong { color: var(--text); }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      padding: 0 28px 28px;
+      flex-wrap: wrap;
+    }
+
+    .btn-watch {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-watch:hover { background: #c1070f; transform: scale(1.03); }
+
+    .btn-watchlist {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-watchlist:hover { background: var(--gold); color: #000; }
+
+    .btn-imdb {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-imdb:hover { opacity: 0.85; }
+
+    /* ── WATCHLIST SECTION ── */
+    #watchlistSection { display: none; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── LOADING ── */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── ERROR ── */
+    .error-msg {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--red);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--gold);
+      color: #000;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 9999;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      header { padding: 16px 20px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); padding: 16px 16px 40px; gap: 14px; }
+      .section-title { padding: 20px 16px 8px; }
+      .modal-top { flex-direction: column; }
+      .modal-poster, .modal-no-poster { width: 100%; min-width: unset; aspect-ratio: 16/9; object-fit: cover; }
+      .modal-actions { padding: 0 16px 24px; }
+      .hero { padding: 50px 16px 30px; }
+      .tabs { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">CINE<span>SEARCH</span></div>
+  <div style="color:var(--muted);font-size:0.8rem;">🎬 Powered by OMDb</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>FIND & WATCH<br><span>ANY MOVIE</span></h1>
+  <p>Search millions of movies — click to watch instantly</p>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search movies, series, actors..." autocomplete="off"/>
+    <button id="searchBtn">🔍 Search</button>
+  </div>
+  <div class="search-hint">Try: Avengers, Inception, Interstellar, RRR...</div>
+</section>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('search')">🔍 Search Results</button>
+  <button class="tab-btn" onclick="switchTab('watchlist')">❤️ My Watchlist (<span id="wlCount">0</span>)</button>
+</div>
+
+<!-- SEARCH SECTION -->
+<section id="searchSection">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Searching the cinematic universe...</p>
+  </div>
+  <div class="error-msg" id="errorMsg">😕 No movies found. Try a different title!</div>
+  <div class="section-title" id="resultTitle" style="display:none">
+    RESULTS FOR <span id="resultQuery"></span>
+  </div>
+  <div class="grid" id="moviesGrid"></div>
+
+  <!-- DEFAULT: Popular searches -->
+  <div id="defaultView">
+    <div class="section-title">🔥 TRY SEARCHING FOR</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;padding:0 40px 40px;">
+      <button class="tab-btn" onclick="quickSearch('Avengers')">Avengers</button>
+      <button class="tab-btn" onclick="quickSearch('Inception')">Inception</button>
+      <button class="tab-btn" onclick="quickSearch('Interstellar')">Interstellar</button>
+      <button class="tab-btn" onclick="quickSearch('RRR')">RRR</button>
+      <button class="tab-btn" onclick="quickSearch('Spider-Man')">Spider-Man</button>
+      <button class="tab-btn" onclick="quickSearch('Batman')">Batman</button>
+      <button class="tab-btn" onclick="quickSearch('KGF')">KGF</button>
+      <button class="tab-btn" onclick="quickSearch('Bahubali')">Bahubali</button>
+      <button class="tab-btn" onclick="quickSearch('Pushpa')">Pushpa</button>
+      <button class="tab-btn" onclick="quickSearch('Vikram')">Vikram</button>
+    </div>
+  </div>
+</section>
+
+<!-- WATCHLIST SECTION -->
+<section id="watchlistSection">
+  <div class="section-title">❤️ MY <span>WATCHLIST</span></div>
+  <div class="grid" id="watchlistGrid"></div>
+  <div class="empty-state" id="wlEmpty" style="display:none">
+    <div class="icon">🎬</div>
+    <p>Your watchlist is empty.<br>Search movies and add them here!</p>
+  </div>
+</section>
+
+<!-- MOVIE DETAIL MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-top">
+      <div id="modalPosterWrap"></div>
+      <div class="modal-details">
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-badges" id="modalBadges"></div>
+        <div class="modal-plot" id="modalPlot"></div>
+        <div id="modalMeta"></div>
+      </div>
+    </div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  🎬 CineSearch &nbsp;|&nbsp; Data from OMDb API &nbsp;|&nbsp; Watch via PlayIMDb &nbsp;|&nbsp; Built for Web Dev Course
+</footer>
+
+<script>
+  const API_KEY = 'f64992e3';
+  const API_BASE = 'https://www.omdbapi.com/';
+  let watchlist = JSON.parse(localStorage.getItem('cinesearch_watchlist') || '[]');
+  let currentMovie = null;
+  let currentTab = 'search';
+
+  // ── UPDATE WATCHLIST COUNT ──
+  function updateWLCount() {
+    document.getElementById('wlCount').textContent = watchlist.length;
+  }
+  updateWLCount();
+
+  // ── SEARCH ──
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  function quickSearch(q) {
+    document.getElementById('searchInput').value = q;
+    doSearch();
+  }
+
+  async function doSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
+
+    showLoading(true);
+    document.getElementById('moviesGrid').innerHTML = '';
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('resultTitle').style.display = 'none';
+    document.getElementById('defaultView').style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_BASE}?s=${encodeURIComponent(query)}&apikey=${API_KEY}`);
+      const data = await res.json();
+
+      showLoading(false);
+
+      if (data.Response === 'True' && data.Search) {
+        document.getElementById('resultTitle').style.display = 'block';
+        document.getElementById('resultQuery').textContent = `"${query.toUpperCase()}"`;
+        renderMovies(data.Search, 'moviesGrid');
+      } else {
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('defaultView').style.display = 'block';
+      }
+    } catch (err) {
+      showLoading(false);
+      document.getElementById('errorMsg').textContent = '⚠️ Network error. Check your connection.';
+      document.getElementById('errorMsg').style.display = 'block';
+    }
+  }
+
+  function showLoading(show) {
+    document.getElementById('loading').style.display = show ? 'block' : 'none';
+  }
+
+  // ── RENDER CARDS ──
+  function renderMovies(movies, gridId) {
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = '';
+    movies.forEach(m => {
+      const inWL = watchlist.some(w => w.imdbID === m.imdbID);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <span class="card-type">${m.Type || 'movie'}</span>
+        ${m.Poster && m.Poster !== 'N/A'
+          ? `<img class="card-poster" src="${m.Poster}" alt="${m.Title}" loading="lazy"/>`
+          : `<div class="card-no-poster">🎬</div>`}
+        <div class="watch-overlay">
+          <button class="play-btn-big" title="Watch Now">▶</button>
+        </div>
+        <div class="card-info">
+          <div class="card-title">${m.Title}</div>
+          <div class="card-meta">
+            <span class="card-year">${m.Year}</span>
+            <span class="card-rating">${inWL ? '❤️' : '⭐'}</span>
+          </div>
+        </div>
+      `;
+      card.addEventListener('click', () => openModal(m.imdbID));
+      grid.appendChild(card);
+    });
+  }
+
+  // ── MODAL ──
+  async function openModal(imdbID) {
+    document.getElementById('modalBg').classList.add('open');
+    document.getElementById('modal').scrollTop = 0;
+
+    // Show loading state
+    document.getElementById('modalTitle').textContent = 'Loading...';
+    document.getElementById('modalBadges').innerHTML = '';
+    document.getElementById('modalPlot').textContent = '';
+    document.getElementById('modalMeta').innerHTML = '';
+    document.getElementById('modalPosterWrap').innerHTML = '<div class="modal-no-poster">⏳</div>';
+    document.getElementById('modalActions').innerHTML = '';
+
+    try {
+      const res = await fetch(`${API_BASE}?i=${imdbID}&plot=full&apikey=${API_KEY}`);
+      const m = await res.json();
+      currentMovie = m;
+
+      // Poster
+      document.getElementById('modalPosterWrap').innerHTML = m.Poster && m.Poster !== 'N/A'
+        ? `<img class="modal-poster" src="${m.Poster}" alt="${m.Title}"/>`
+        : `<div class="modal-no-poster">🎬</div>`;
+
+      // Title
+      document.getElementById('modalTitle').textContent = m.Title;
+
+      // Badges
+      const inWL = watchlist.some(w => w.imdbID === m.imdbID);
+      document.getElementById('modalBadges').innerHTML = `
+        ${m.Year !== 'N/A' ? `<span class="badge">${m.Year}</span>` : ''}
+        ${m.Runtime !== 'N/A' ? `<span class="badge">⏱ ${m.Runtime}</span>` : ''}
+        ${m.imdbRating !== 'N/A' ? `<span class="badge gold">⭐ ${m.imdbRating}/10</span>` : ''}
+        ${m.Rated !== 'N/A' ? `<span class="badge">${m.Rated}</span>` : ''}
+        ${m.Genre !== 'N/A' ? m.Genre.split(',').map(g => `<span class="badge red">${g.trim()}</span>`).join('') : ''}
+      `;
+
+      // Plot
+      document.getElementById('modalPlot').textContent = m.Plot !== 'N/A' ? m.Plot : 'No description available.';
+
+      // Meta
+      document.getElementById('modalMeta').innerHTML = `
+        ${m.Director !== 'N/A' ? `<div class="modal-row"><strong>Director:</strong> ${m.Director}</div>` : ''}
+        ${m.Actors !== 'N/A' ? `<div class="modal-row"><strong>Cast:</strong> ${m.Actors}</div>` : ''}
+        ${m.Language !== 'N/A' ? `<div class="modal-row"><strong>Language:</strong> ${m.Language}</div>` : ''}
+        ${m.Country !== 'N/A' ? `<div class="modal-row"><strong>Country:</strong> ${m.Country}</div>` : ''}
+        ${m.BoxOffice && m.BoxOffice !== 'N/A' ? `<div class="modal-row"><strong>Box Office:</strong> ${m.BoxOffice}</div>` : ''}
+      `;
+
+      // Actions
+      // Take the real IMDb link and add "play" before "imdb.com"
+      const imdbURL = `https://www.imdb.com/title/${m.imdbID}`;
+      const playURL = imdbURL.replace('www.imdb.com', 'www.playimdb.com');
+      document.getElementById('modalActions').innerHTML = `
+        <button class="btn-watch" onclick="watchMovie('${playURL}')">▶ Watch Now</button>
+        <button class="btn-watchlist" id="wlToggleBtn" onclick="toggleWatchlist()">${inWL ? '❤️ In Watchlist' : '🤍 Add to Watchlist'}</button>
+        <a class="btn-imdb" href="${imdbURL}" target="_blank" rel="noopener">IMDb ↗</a>
+      `;
+    } catch (err) {
+      document.getElementById('modalTitle').textContent = 'Error loading movie details';
+    }
+  }
+
+  function watchMovie(url) {
+    window.open(url, '_blank');
+    showToast('🎬 Opening movie... Enjoy!');
+  }
+
+  function closeModal() {
+    document.getElementById('modalBg').classList.remove('open');
+    currentMovie = null;
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modalBg')) closeModal();
+  }
+
+  // ── WATCHLIST ──
+  function toggleWatchlist() {
+    if (!currentMovie) return;
+    const idx = watchlist.findIndex(w => w.imdbID === currentMovie.imdbID);
+    if (idx === -1) {
+      watchlist.push({
+        imdbID: currentMovie.imdbID,
+        Title: currentMovie.Title,
+        Year: currentMovie.Year,
+        Poster: currentMovie.Poster,
+        Type: currentMovie.Type,
+        imdbRating: currentMovie.imdbRating
+      });
+      document.getElementById('wlToggleBtn').textContent = '❤️ In Watchlist';
+      showToast(`❤️ "${currentMovie.Title}" added to Watchlist!`);
+    } else {
+      watchlist.splice(idx, 1);
+      document.getElementById('wlToggleBtn').textContent = '🤍 Add to Watchlist';
+      showToast(`Removed from Watchlist`);
+      if (currentTab === 'watchlist') renderWatchlist();
+    }
+    localStorage.setItem('cinesearch_watchlist', JSON.stringify(watchlist));
+    updateWLCount();
+  }
+
+  function renderWatchlist() {
+    const grid = document.getElementById('watchlistGrid');
+    const empty = document.getElementById('wlEmpty');
+    if (watchlist.length === 0) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      renderMovies(watchlist, 'watchlistGrid');
+    }
+  }
+
+  // ── TABS ──
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (i === 0 && tab === 'search') || (i === 1 && tab === 'watchlist'));
+    });
+    document.getElementById('searchSection').style.display = tab === 'search' ? 'block' : 'none';
+    document.getElementById('watchlistSection').style.display = tab === 'watchlist' ? 'block' : 'none';
+    if (tab === 'watchlist') renderWatchlist();
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── KEYBOARD ESC ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
